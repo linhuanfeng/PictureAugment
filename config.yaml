@@ -14,7 +14,7 @@ datasets:
   - val
 
 # 每张图像生成的增强数量
-num_augments: 3
+num_augments: 7
 
 # 变换配置
 transforms:
