@@ -36,6 +36,7 @@ python run.py augment -c config.yaml
 ```
 
 参数：
+
 - `-c, --config`: 配置文件路径
 
 ### 2. 可视化查看
@@ -45,10 +46,12 @@ python run.py view -d <数据根目录> -s <数据集>
 ```
 
 参数：
+
 - `-d, --data`: 数据根目录 (默认: ./data)
 - `-s, --split`: 数据集 train/val/test (默认: train)
 
 示例：
+
 ```bash
 # 查看训练集
 python run.py view -s train
@@ -64,8 +67,9 @@ python run.py view -d ./data/augmented -s train
 ```
 
 键盘操作：
-| 按键 | 功能 |
-|------|------|
-| `←` | 上一张图片 |
-| `→` | 下一张图片 |
-| `ESC` | 退出 |
+
+| 按键    | 功能       |
+| ------- | ---------- |
+| `←`  | 上一张图片 |
+| `→`  | 下一张图片 |
+| `ESC` | 退出       |
