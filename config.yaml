@@ -1,12 +1,19 @@
 # YOLO数据增强配置文件
 
 # 输入根目录
-input_images_root: "./data/images"
-input_labels_root: "./data/labels"
+# input_images_root: "./data/images"
+# input_labels_root: "./data/labels"
+
+# # 输出根目录
+# output_images_root: "./data/augmented/images"
+# output_labels_root: "./data/augmented/labels"
+
+input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3/images"
+input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3/labels"
 
 # 输出根目录
-output_images_root: "./data/augmented/images"
-output_labels_root: "./data/augmented/labels"
+output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3_augumented/images"
+output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3_augumented/labels"
 
 # 要增强的数据集（train/val/test）
 datasets:
@@ -14,7 +21,7 @@ datasets:
   - val
 
 # 每张图像生成的增强数量
-num_augments: 7
+num_augments: 8
 
 # 变换配置
 transforms:
