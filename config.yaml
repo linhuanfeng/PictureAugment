@@ -8,12 +8,12 @@
 # output_images_root: "./data/augmented/images"
 # output_labels_root: "./data/augmented/labels"
 
-input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3/images"
-input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3/labels"
+input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou/images"
+input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou/labels"
 
 # 输出根目录
-output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3_augumented/images"
-output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/datasetsv3_augumented/labels"
+output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_augumented/images"
+output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_augumented/labels"
 
 # 要增强的数据集（train/val/test）
 datasets:
