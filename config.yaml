@@ -8,12 +8,12 @@
 # output_images_root: "./data/augmented/images"
 # output_labels_root: "./data/augmented/labels"
 
-input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test/images"
-input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test/labels"
+input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin/images"
+input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin/labels"
 
 # 输出根目录
-output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test_augumented/images"
-output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test_augumented/labels"
+output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin/images"
+output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin/labels"
 
 # 要增强的数据集（train/val/test）
 datasets:
