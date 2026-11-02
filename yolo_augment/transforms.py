@@ -24,14 +24,44 @@ class BaseTransform:
 
 
 class Rotate(BaseTransform):
-    """旋转变换"""
-    def __init__(self, angle_range: Tuple[float, float] = (-30, 30), p: float = 0.5):
+    """旋转变换
+
+    常规增强：以概率 p 在 angle_range 内随机取一个角度。
+    必转角度：fixed_angles 里的每个角度，每张图都会各生成一张精确旋转的图，
+    再各生成 fixed_jitter_copies 张在该角度 ±fixed_jitter 度内随机偏移的图（见 fixed_variants）。
+    """
+    def __init__(self, angle_range: Tuple[float, float] = (-30, 30), p: float = 0.5,
+                 fixed_angles: Tuple[float, ...] = (), fixed_jitter: float = 0,
+                 fixed_jitter_copies: int = 0):
         super().__init__(p)
         self.angle_range = angle_range
+        self.fixed_angles = tuple(fixed_angles)
+        self.fixed_jitter = fixed_jitter
+        self.fixed_jitter_copies = fixed_jitter_copies
+
+    @property
+    def fixed_count(self) -> int:
+        """每张图额外生成的必转图数量"""
+        return len(self.fixed_angles) * (1 + self.fixed_jitter_copies)
+
+    def fixed_variants(self) -> List[Tuple[str, float]]:
+        """返回 [(文件名标记, 角度)]：每个必转角度一张精确的，加若干张附近随机偏移的"""
+        variants = []
+        for base in self.fixed_angles:
+            tag = f"{base:g}".replace('-', 'n')
+            variants.append((f"rot{tag}", float(base)))
+            for j in range(self.fixed_jitter_copies):
+                offset = np.random.uniform(-self.fixed_jitter, self.fixed_jitter)
+                variants.append((f"rot{tag}_j{j}", float(base) + offset))
+        return variants
 
     def apply(self, image: np.ndarray, bboxes: List[BBox]) -> Tuple[np.ndarray, List[BBox]]:
+        return self.rotate_by(image, bboxes, np.random.uniform(*self.angle_range))
+
+    def rotate_by(self, image: np.ndarray, bboxes: List[BBox],
+                  angle: float) -> Tuple[np.ndarray, List[BBox]]:
+        """按指定角度旋转（逆时针为正），画布放大以容纳整张图"""
         h, w = image.shape[:2]
-        angle = np.random.uniform(*self.angle_range)
         center = (w / 2, h / 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
 
@@ -211,9 +241,19 @@ class Compose:
     def __init__(self, transforms: List[BaseTransform]):
         self.transforms = transforms
 
-    def __call__(self, image: np.ndarray, bboxes: List[BBox]) -> Tuple[np.ndarray, List[BBox]]:
+    @property
+    def rotate(self) -> Optional[Rotate]:
+        """配置里启用的旋转变换，没有则为 None"""
+        return next((t for t in self.transforms if isinstance(t, Rotate)), None)
+
+    def __call__(self, image: np.ndarray, bboxes: List[BBox],
+                 forced_angle: Optional[float] = None) -> Tuple[np.ndarray, List[BBox]]:
+        """forced_angle 不为空时，旋转这一步固定用该角度（必转），其余变换仍按各自概率应用"""
         for t in self.transforms:
-            image, bboxes = t(image, bboxes)
+            if forced_angle is not None and isinstance(t, Rotate):
+                image, bboxes = t.rotate_by(image, bboxes, forced_angle)
+            else:
+                image, bboxes = t(image, bboxes)
         return image, bboxes
 
 
@@ -225,7 +265,10 @@ def build_transforms(config: dict) -> Compose:
         cfg = config['rotate']
         transforms.append(Rotate(
             angle_range=tuple(cfg.get('angle_range', [-30, 30])),
-            p=cfg.get('p', 0.5)
+            p=cfg.get('p', 0.5),
+            fixed_angles=tuple(cfg.get('fixed_angles', [])),
+            fixed_jitter=cfg.get('fixed_jitter', 0),
+            fixed_jitter_copies=cfg.get('fixed_jitter_copies', 0)
         ))
 
     if config.get('mask', {}).get('enabled', False):

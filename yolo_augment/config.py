@@ -20,6 +20,18 @@ def validate_config(config: Dict[str, Any]) -> None:
         if key not in config:
             raise ValueError(f"配置缺少必需字段: {key}")
 
+    rotate = config.get('transforms', {}).get('rotate', {})
+    angles = rotate.get('fixed_angles', [])
+    if not isinstance(angles, list) or not all(isinstance(a, (int, float)) for a in angles):
+        raise ValueError("rotate.fixed_angles 必须是数字列表，例如 [90, 270]")
+    jitter, copies = rotate.get('fixed_jitter', 0), rotate.get('fixed_jitter_copies', 0)
+    if not isinstance(jitter, (int, float)) or jitter < 0:
+        raise ValueError("rotate.fixed_jitter 必须是不小于 0 的数字")
+    if not isinstance(copies, int) or copies < 0:
+        raise ValueError("rotate.fixed_jitter_copies 必须是不小于 0 的整数")
+    if angles and rotate.get('enabled', False) is not True:
+        raise ValueError("配置了 rotate.fixed_angles，但 rotate.enabled 不是 true")
+
     transforms = config.get('transforms', {})
     valid_transforms = ['rotate', 'mask', 'distort', 'gaussian_noise',
                         'hsv_adjust', 'grayscale', 'brightness_boost']

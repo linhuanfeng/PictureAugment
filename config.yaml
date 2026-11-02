@@ -8,12 +8,12 @@
 # output_images_root: "./data/augmented/images"
 # output_labels_root: "./data/augmented/labels"
 
-input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou/images"
-input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou/labels"
+input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test/images"
+input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test/labels"
 
 # 输出根目录
-output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_augumented/images"
-output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_augumented/labels"
+output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test_augumented/images"
+output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/data_5_zhou_test_augumented/labels"
 
 # 要增强的数据集（train/val/test）
 datasets:
@@ -30,6 +30,11 @@ transforms:
     enabled: true
     angle_range: [-30, 30]  # 旋转角度范围
     p: 0.5  # 应用概率
+    # 必转角度：下面每个角度，每张图都会额外生成一张精确旋转的图（逆时针为正，90 和 270 对应手机竖拍的两个方向）
+    # 不需要时删掉这三项，或把 fixed_angles 设为 []
+    fixed_angles: [90, 270]
+    fixed_jitter: 15  # 在每个必转角度附近随机偏移 ±15 度，模拟手持没拿正
+    fixed_jitter_copies: 2  # 每个必转角度再额外生成几张带偏移的图（0 表示只要精确角度）
 
   # 随机遮挡
   mask:

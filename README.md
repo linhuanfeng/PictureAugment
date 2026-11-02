@@ -39,6 +39,26 @@ python run.py augment -c config.yaml
 
 - `-c, --config`: 配置文件路径
 
+#### 必转角度（rotate.fixed_angles）
+
+`rotate` 的常规随机旋转只是"以概率 p 在 angle_range 里随机转一下"，不保证出现 90° 这类关键角度。需要保证时配置：
+
+```yaml
+rotate:
+  enabled: true
+  angle_range: [-30, 30]
+  p: 0.5
+  fixed_angles: [90, 270]   # 每张图、每个角度都必转（逆时针为正）
+  fixed_jitter: 15          # 在必转角度附近随机偏移 ±15 度
+  fixed_jitter_copies: 2    # 每个必转角度额外生成几张带偏移的图
+```
+
+- 每张图在 `num_augments` 张常规增强之外，额外输出 `len(fixed_angles) × (1 + fixed_jitter_copies)` 张。上面的配置是 2 × 3 = 6 张。
+- 文件名带角度标记，负号写作 `n`：`xxx_rot90.jpg`（精确角度）、`xxx_rot90_j0.jpg`（附近偏移）、`xxx_rotn30.jpg`。
+- 必转图的旋转角度固定，其余变换（遮挡、畸变、噪声、颜色等）仍按各自概率应用。
+- 不需要时删掉这三项，或把 `fixed_angles` 设为 `[]`，行为和原来一致。
+- 旋转后标注框取旋转框的外接矩形，非 90° 倍数的角度框会偏松。
+
 ### 2. 可视化查看
 
 ```bash

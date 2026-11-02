@@ -21,6 +21,9 @@ class YOLOAugmenter:
         self.datasets = config.get('datasets', ['train'])
         self.num_augments = config.get('num_augments', 1)
         self.transforms = build_transforms(config.get('transforms', {}))
+        rotate = self.transforms.rotate
+        self.fixed_count = rotate.fixed_count if rotate else 0  # 每张图额外的必转角度输出数
+        self.per_image = self.num_augments + self.fixed_count
 
     def _get_image_files(self, images_dir: Path) -> List[Path]:
         """获取目录下所有图像文件"""
@@ -52,7 +55,7 @@ class YOLOAugmenter:
 
         print(f"[{dataset}] 找到 {len(images)} 张图像")
 
-        total = len(images) * self.num_augments
+        total = len(images) * self.per_image
         with tqdm(total=total, desc=f"[{dataset}]") as pbar:
             for img_path in images:
                 self._process_image(img_path, labels_dir,
@@ -64,14 +67,18 @@ class YOLOAugmenter:
         label_path = labels_dir / f"{img_path.stem}.txt"
         image = cv2.imread(str(img_path))
         if image is None:
-            pbar.update(self.num_augments)
+            pbar.update(self.per_image)
             return
 
         bboxes = parse_yolo_label(label_path)
 
-        for i in range(self.num_augments):
-            aug_img, aug_bboxes = self.transforms(image.copy(), bboxes.copy())
-            suffix = f"_aug{i}"
+        jobs = [(f"_aug{i}", None) for i in range(self.num_augments)]
+        if self.fixed_count:
+            # 必转角度：每张图都生成，文件名带角度标记（负号写作 n），例如 xxx_rot90.jpg、xxx_rot270_j0.jpg
+            jobs += [(f"_{tag}", angle) for tag, angle in self.transforms.rotate.fixed_variants()]
+
+        for suffix, angle in jobs:
+            aug_img, aug_bboxes = self.transforms(image.copy(), bboxes.copy(), forced_angle=angle)
             out_img = out_images_dir / f"{img_path.stem}{suffix}{img_path.suffix}"
             out_label = out_labels_dir / f"{img_path.stem}{suffix}.txt"
 
