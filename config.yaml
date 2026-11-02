@@ -23,6 +23,9 @@ datasets:
 # 每张图像生成的增强数量
 num_augments: 8
 
+# 并行进程数。不填则取 CPU 核数的 3/4；填 1 表示单进程（调试时用）
+# workers: 12
+
 # 变换配置
 transforms:
   # 旋转变换

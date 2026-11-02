@@ -5,6 +5,17 @@ import numpy as np
 from typing import List, Tuple, Optional
 from .annotation import BBox
 
+_rng = np.random.default_rng()  # 噪声用 Generator：直接生成 float32，比 np.random.normal 快
+
+
+def seed_random(seed_seq: Optional[np.random.SeedSequence] = None) -> None:
+    """给 numpy 全局随机数和模块里的 Generator 重新播种。
+    多进程时每个子进程都要调用：fork 出来的子进程会继承同一个随机状态，不播种所有进程会生成一样的增强。"""
+    global _rng
+    seed_seq = seed_seq or np.random.SeedSequence()  # 缺省取系统熵，每个进程都不同
+    np.random.seed(int(seed_seq.generate_state(1)[0]))
+    _rng = np.random.default_rng(seed_seq)
+
 
 class BaseTransform:
     """变换基类"""
@@ -176,9 +187,12 @@ class GaussianNoise(BaseTransform):
 
     def apply(self, image: np.ndarray, bboxes: List[BBox]) -> Tuple[np.ndarray, List[BBox]]:
         std = np.random.uniform(*self.std_range)
-        noise = np.random.normal(self.mean, std, image.shape).astype(np.float32)
-        noisy = np.clip(image.astype(np.float32) + noise, 0, 255).astype(np.uint8)
-        return noisy, bboxes
+        noise = _rng.standard_normal(image.shape, dtype=np.float32)
+        noise *= std
+        noise += self.mean
+        noise += image  # uint8 原地加到 float32 上，少一次整图拷贝
+        np.clip(noise, 0, 255, out=noise)
+        return noise.astype(np.uint8), bboxes
 
 
 class HSVAdjust(BaseTransform):
@@ -194,21 +208,23 @@ class HSVAdjust(BaseTransform):
         self.value_range = value_range
 
     def apply(self, image: np.ndarray, bboxes: List[BBox]) -> Tuple[np.ndarray, List[BBox]]:
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV).astype(np.float32)
+        # 全程 uint8，每个通道的调整做成 256 项的查找表，比转 float32 逐像素算快
+        h, sat, val = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
+        levels = np.arange(256, dtype=np.float32)
 
         # 调整色调 (H通道范围是0-179)
         hue_shift = np.random.uniform(*self.hue_range)
-        hsv[:, :, 0] = (hsv[:, :, 0] + hue_shift * 179) % 180
+        h = cv2.LUT(h, ((levels + hue_shift * 179) % 180).astype(np.uint8))
 
         # 调整饱和度
         sat_scale = np.random.uniform(*self.saturation_range)
-        hsv[:, :, 1] = np.clip(hsv[:, :, 1] * sat_scale, 0, 255)
+        sat = cv2.LUT(sat, np.clip(levels * sat_scale, 0, 255).astype(np.uint8))
 
         # 调整明度
         val_scale = np.random.uniform(*self.value_range)
-        hsv[:, :, 2] = np.clip(hsv[:, :, 2] * val_scale, 0, 255)
+        val = cv2.LUT(val, np.clip(levels * val_scale, 0, 255).astype(np.uint8))
 
-        result = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
+        result = cv2.cvtColor(cv2.merge([h, sat, val]), cv2.COLOR_HSV2BGR)
         return result, bboxes
 
 
@@ -232,8 +248,7 @@ class BrightnessBoost(BaseTransform):
 
     def apply(self, image: np.ndarray, bboxes: List[BBox]) -> Tuple[np.ndarray, List[BBox]]:
         brightness_factor = np.random.uniform(*self.brightness_range)
-        result = np.clip(image.astype(np.float32) * brightness_factor, 0, 255).astype(np.uint8)
-        return result, bboxes
+        return cv2.convertScaleAbs(image, alpha=brightness_factor), bboxes  # 内部饱和到 0-255
 
 
 class Compose:

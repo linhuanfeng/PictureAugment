@@ -20,6 +20,10 @@ def validate_config(config: Dict[str, Any]) -> None:
         if key not in config:
             raise ValueError(f"配置缺少必需字段: {key}")
 
+    workers = config.get('workers')
+    if workers is not None and (not isinstance(workers, int) or isinstance(workers, bool) or workers < 1):
+        raise ValueError("workers 必须是不小于 1 的整数（不填则自动取 CPU 核数的 3/4）")
+
     rotate = config.get('transforms', {}).get('rotate', {})
     angles = rotate.get('fixed_angles', [])
     if not isinstance(angles, list) or not all(isinstance(a, (int, float)) for a in angles):
