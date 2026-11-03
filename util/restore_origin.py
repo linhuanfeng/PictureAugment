@@ -18,7 +18,6 @@ import re
 import shutil
 import sys
 from pathlib import Path
-
 DATASET = Path("/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset")
 DEFAULT_SRC = DATASET / "datasetsv3"
 DEFAULT_DST = DATASET / "datasetsv3_origin"

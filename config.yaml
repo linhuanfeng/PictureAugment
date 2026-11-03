@@ -12,8 +12,8 @@ input_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other
 input_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin/labels"
 
 # 输出根目录
-output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin/images"
-output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin/labels"
+output_images_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin_augumented/images"
+output_labels_root: "/media/xiaozhang/7b92dbd7-9b4b-479a-82aa-eea1734006a21/other_workspace/dataset/datasetsv3_origin_augumented/labels"
 
 # 要增强的数据集（train/val/test）
 datasets:
